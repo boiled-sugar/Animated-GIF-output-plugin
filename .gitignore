@@ -10,3 +10,8 @@
 *.lai
 *.la
 *.a
+
+#AviUtl Plugins
+*.auf
+*.aui
+*.auo

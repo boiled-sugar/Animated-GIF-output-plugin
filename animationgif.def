@@ -1,0 +1,5 @@
+LIBRARY animationgif.auo
+
+EXPORTS
+    GetOutputPluginTable @1
+

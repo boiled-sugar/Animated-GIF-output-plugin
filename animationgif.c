@@ -1,0 +1,74 @@
+//----------------------------------------------------------------------------------
+//		アニメーションGIF出力プラグイン
+//----------------------------------------------------------------------------------
+#include <windows.h>
+#include <wand/MagickWand.h>
+
+#include "output.h"
+
+
+//---------------------------------------------------------------------
+//		出力プラグイン構造体定義
+//---------------------------------------------------------------------
+OUTPUT_PLUGIN_TABLE output_plugin_table = {
+	0,  												//	フラグ NULLだと警告
+	"アニメーションGIF出力",							//	プラグインの名前
+	"GIF File (*.gif)\0*.gif\0AllFile (*.*)\0*.*\0",	//	出力ファイルのフィルタ
+	"アニメーションGIF出力プラグイン ver.0.0.1",		//	プラグインの情報
+	NULL,												//	DLL開始時に呼ばれる関数へのポインタ (NULLなら呼ばれません)
+	NULL,												//	DLL終了時に呼ばれる関数へのポインタ (NULLなら呼ばれません)
+	func_output,										//	出力時に呼ばれる関数へのポインタ
+	NULL,					        					//	出力設定のダイアログを要求された時に呼ばれる関数へのポインタ (NULLなら呼ばれません)
+	NULL,				            					//	出力設定データを取得する時に呼ばれる関数へのポインタ (NULLなら呼ばれません)
+	NULL            ,									//	出力設定データを設定する時に呼ばれる関数へのポインタ (NULLなら呼ばれません)
+};
+
+
+//---------------------------------------------------------------------
+//		出力プラグイン構造体のポインタを渡す関数
+//---------------------------------------------------------------------
+EXTERN_C OUTPUT_PLUGIN_TABLE __declspec(dllexport) * __stdcall GetOutputPluginTable( void )
+{
+	return &output_plugin_table;
+}
+
+
+//---------------------------------------------------------------------
+//		出力プラグイン処理本体
+//---------------------------------------------------------------------
+BOOL func_output( OUTPUT_INFO *oip )
+{
+    const int mabiki = 1;    //2にすると2フレーム中1フレームの間引き
+    
+    if( oip->n > 400 / mabiki )
+        if( MessageBox( NULL, (LPCSTR) "大量のフレームが選択されています。\n本当に続行しますか？", (LPCSTR) "アニメーションGIF出力プラグイン", MB_YESNO | MB_ICONQUESTION )
+            == IDNO )
+            return FALSE;
+    
+    const int delay = mabiki * 100 * oip->scale / oip->rate;    //間引き×100÷フレームレート
+    MagickWandGenesis();
+    MagickWand *dest = NewMagickWand();
+    
+    for( int i = 0; i < oip->n; i = i + mabiki )
+    {
+        if( oip->func_is_abort() )
+            break;
+        oip->func_rest_time_disp( i, oip->n );
+        MagickWand *source = NewMagickWand();
+        if( !MagickConstituteImage( source, oip->w, oip->h, "BGR", CharPixel, oip->func_get_video_ex( i, 0 ) ) )    //NULLだと警告
+            MessageBox( NULL, (LPCSTR) "データ取得失敗", (LPCSTR) "アニメーションGIF出力プラグイン", MB_OK|MB_ICONSTOP );
+        MagickFlipImage( source );    //AviUtlからはボトムアップで渡されるが、MagickConstituteImageはトップダウン固定
+        MagickSetImageDelay( source, delay );
+        MagickAddImage( dest, source );
+        DestroyMagickWand( source );
+        oip->func_update_preview();
+    }
+    if( !MagickSetFormat( dest, "GIF" ) || !MagickSetImageType( dest, PaletteType ) )
+        MessageBox( NULL, (LPCSTR) "GIFセット失敗", (LPCSTR) "アニメーションGIF出力プラグイン", MB_OK|MB_ICONSTOP );
+    if( !MagickWriteImages( MagickCoalesceImages( dest ), oip->savefile, MagickTrue ) )
+        MessageBox( NULL, (LPCSTR) "出力失敗", (LPCSTR) "アニメーションGIF出力プラグイン", MB_OK|MB_ICONSTOP );
+    
+    DestroyMagickWand( dest );
+    MagickWandTerminus();
+    return TRUE;
+}
