@@ -2,7 +2,7 @@
 //		アニメーションGIF出力プラグイン
 //----------------------------------------------------------------------------------
 #include <windows.h>
-#include <wand/MagickWand.h>
+#include <wand/MagickWand.h>    //ImageMagick-6.7.8-1を使用
 
 #include "output.h"
 
