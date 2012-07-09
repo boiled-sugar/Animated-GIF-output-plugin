@@ -54,16 +54,27 @@ BOOL func_output( OUTPUT_INFO *oip )
         if( oip->func_is_abort() )
             break;
         oip->func_rest_time_disp( i, oip->n );
+        
+        int copy = 0;    //コピーフレーム数
+        for( int j = 1; i + j < oip->n; j++ )
+        {
+            if( oip->func_get_flag( i + j ) & OUTPUT_INFO_FRAME_FLAG_COPYFRAME )
+                copy++;
+            else
+                break;
+        }
+        
         MagickWand *source = NewMagickWand();
         if( !MagickConstituteImage( source, oip->w, oip->h, "BGR", CharPixel, oip->func_get_video_ex( i, 0 ) ) )    //NULLだと警告
             MessageBox( NULL, (LPCSTR) "データ取得失敗", (LPCSTR) "アニメーションGIF出力プラグイン", MB_OK|MB_ICONSTOP );
         MagickFlipImage( source );    //AviUtlからはボトムアップで渡されるが、MagickConstituteImageはトップダウン固定
-        MagickSetImageDelay( source, delay );
+        MagickSetImageDelay( source, delay * ( copy + 1 ) );    //コピーフレーム数0なら1倍
         MagickAddImage( dest, source );
         DestroyMagickWand( source );
+        i = i + copy;    //コピーフレーム数分だけ先送り
         oip->func_update_preview();
     }
-    if( !MagickSetFormat( dest, "GIF" ) || !MagickSetImageType( dest, PaletteType ) )
+    if( !MagickSetFormat( dest, "GIF" ) )
         MessageBox( NULL, (LPCSTR) "GIFセット失敗", (LPCSTR) "アニメーションGIF出力プラグイン", MB_OK|MB_ICONSTOP );
     if( !MagickWriteImages( MagickCoalesceImages( dest ), oip->savefile, MagickTrue ) )
         MessageBox( NULL, (LPCSTR) "出力失敗", (LPCSTR) "アニメーションGIF出力プラグイン", MB_OK|MB_ICONSTOP );
