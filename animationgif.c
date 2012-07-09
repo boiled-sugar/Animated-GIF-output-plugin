@@ -3,7 +3,7 @@
 //----------------------------------------------------------------------------------
 #include <windows.h>
 #include <wand/MagickWand.h>    //ImageMagick-6.7.8-1を使用
-
+                                //./configure --disable-shared --without-magick-plus-plus --with-quantum-depth=8 --disable-installed --without-bzlib
 #include "output.h"
 
 
@@ -40,7 +40,7 @@ BOOL func_output( OUTPUT_INFO *oip )
 {
     const int mabiki = 1;    //2にすると2フレーム中1フレームの間引き
     
-    if( oip->n > 400 / mabiki )
+    if( oip->n > 500 / mabiki )
         if( MessageBox( NULL, (LPCSTR) "大量のフレームが選択されています。\n本当に続行しますか？", (LPCSTR) "アニメーションGIF出力プラグイン", MB_YESNO | MB_ICONQUESTION )
             == IDNO )
             return FALSE;

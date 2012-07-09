@@ -1,5 +1,6 @@
 CC = gcc
-CFLAG = -c -O3 -std=c99 -Wall -I/usr/local/include/ImageMagick
+CFLAG = -c -O3 -std=c99 -Wall -fopenmp -D_LIB -D_MT -I/usr/local/include/ImageMagick
+# MagickWand-config --cflags
 LINK = gcc
 LFLAG = --shared -L/usr/local/lib -Wl,--enable-stdcall-fixup,--dll -s
 
@@ -10,8 +11,8 @@ DEF  = animationgif.def
 all: $(TARGET)
 
 $(TARGET): $(OBJ1) $(DEF)
-	$(LINK) $(LFLAG) -o $(TARGET) $(OBJ1) -lMagickWand -lMagickCore -lz -lgdi32 $(DEF)
-#-lMagickCore -lbz2 -lz -lgdi32 -lm -lgomp -lpthread
+	$(LINK) $(LFLAG) -o $(TARGET) $(OBJ1) -lMagickWand -lMagickCore -lz -lgdi32 -lgomp -lpthread $(DEF)
+
 $(OBJ1): animationgif.c
 	$(CC) $(CFLAG) animationgif.c
 
