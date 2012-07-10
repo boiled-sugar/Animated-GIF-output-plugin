@@ -14,7 +14,7 @@ OUTPUT_PLUGIN_TABLE output_plugin_table = {
 	0,  												//	フラグ NULLだと警告
 	"アニメーションGIF出力",							//	プラグインの名前
 	"GIF File (*.gif)\0*.gif\0AllFile (*.*)\0*.*\0",	//	出力ファイルのフィルタ
-	"アニメーションGIF出力プラグイン ver.0.0.1",		//	プラグインの情報
+	"アニメーションGIF出力プラグイン ver.0.0.2",		//	プラグインの情報
 	NULL,												//	DLL開始時に呼ばれる関数へのポインタ (NULLなら呼ばれません)
 	NULL,												//	DLL終了時に呼ばれる関数へのポインタ (NULLなら呼ばれません)
 	func_output,										//	出力時に呼ばれる関数へのポインタ
