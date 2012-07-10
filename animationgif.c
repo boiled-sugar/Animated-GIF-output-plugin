@@ -43,7 +43,7 @@ BOOL func_output( OUTPUT_INFO *oip )
     if( oip->n > 500 / mabiki )
         if( MessageBox( NULL, (LPCSTR) "大量のフレームが選択されています。\n本当に続行しますか？", (LPCSTR) "アニメーションGIF出力プラグイン", MB_YESNO | MB_ICONQUESTION )
             == IDNO )
-            return FALSE;
+            return TRUE;
     
     const int delay = mabiki * 100 * oip->scale / oip->rate;    //間引き×100÷フレームレート
     MagickWandGenesis();
@@ -52,7 +52,17 @@ BOOL func_output( OUTPUT_INFO *oip )
     for( int i = 0; i < oip->n; i = i + mabiki )
     {
         if( oip->func_is_abort() )
-            break;
+        {
+            if( MessageBox( NULL, (LPCSTR) "ここまでの出力データをアニメーションGIFに書き込みますか？", (LPCSTR) "アニメーションGIF出力プラグイン", MB_YESNO | MB_ICONQUESTION )
+                == IDYES )
+                break;
+            else
+            {
+                DestroyMagickWand( dest );
+                MagickWandTerminus();
+                return TRUE;
+            }
+        }
         oip->func_rest_time_disp( i, oip->n );
         
         int copy = 0;    //コピーフレーム数
