@@ -2,6 +2,7 @@
 //		アニメーションGIF出力プラグイン
 //----------------------------------------------------------------------------------
 #include <windows.h>
+#include <math.h>
 #include <wand/MagickWand.h>    //ImageMagick-6.7.8-1を使用
                                 //./configure --disable-shared --without-magick-plus-plus --with-quantum-depth=8 --disable-installed --without-bzlib
 #include "output.h"
@@ -38,14 +39,14 @@ EXTERN_C OUTPUT_PLUGIN_TABLE __declspec(dllexport) * __stdcall GetOutputPluginTa
 //---------------------------------------------------------------------
 BOOL func_output( OUTPUT_INFO *oip )
 {
-    const int mabiki = 1;    //2にすると2フレーム中1フレームの間引き
-    
+    const double mabiki = 1;    //2にすると2フレーム中1フレームの間引き
+                                //intだと四捨五入の計算ができない
     if( oip->n > 500 / mabiki )
         if( MessageBox( NULL, (LPCSTR) "大量のフレームが選択されています。\n本当に続行しますか？", (LPCSTR) "アニメーションGIF出力プラグイン", MB_YESNO | MB_ICONQUESTION )
             == IDNO )
             return TRUE;
     
-    const int delay = mabiki * 100 * oip->scale / oip->rate;    //間引き×100÷フレームレート
+    const int delay = round( mabiki * 100 * oip->scale / oip->rate );    //間引き×100÷フレームレートを四捨五入
     MagickWandGenesis();
     MagickWand *dest = NewMagickWand();
     
