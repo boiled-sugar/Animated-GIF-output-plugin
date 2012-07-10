@@ -1,6 +1,5 @@
 CC = gcc
-CFLAG = -c -O3 -std=c99 -Wall -fopenmp -D_LIB -D_MT -I/usr/local/include/ImageMagick
-# MagickWand-config --cflags
+CFLAG = -c -O3 -std=c99 -Wall `MagickWand-config --cflags`
 LINK = gcc
 LFLAG = --shared -L/usr/local/lib -Wl,--enable-stdcall-fixup,--dll -s
 
