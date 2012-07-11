@@ -85,7 +85,6 @@ BOOL func_output( OUTPUT_INFO *oip )
         i = i + copy;    //コピーフレーム数分だけ先送り
         oip->func_update_preview();
     }
-    MagickPosterizeImage( dest, 256, MagickTrue );
     if( !MagickSetFormat( dest, "GIF" ) )
         MessageBox( NULL, (LPCSTR) "GIFセット失敗", (LPCSTR) "アニメーションGIF出力プラグイン", MB_OK|MB_ICONSTOP );
     if( !MagickWriteImages( MagickCoalesceImages( dest ), oip->savefile, MagickTrue ) )
