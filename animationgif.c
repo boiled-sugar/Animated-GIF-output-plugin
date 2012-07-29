@@ -89,7 +89,7 @@ BOOL func_output( OUTPUT_INFO *oip )
     MagickQuantizeImages( dest, 256, RGBColorspace, 0, FloydSteinbergDitherMethod, MagickFalse );
     if( !MagickSetFormat( dest, "GIF" ) )
         MessageBox( NULL, (LPCSTR) "GIFセット失敗", (LPCSTR) "アニメーションGIF出力プラグイン", MB_OK|MB_ICONSTOP );
-    if( !MagickWriteImages( MagickCoalesceImages( dest ), oip->savefile, MagickTrue ) )
+    if( !MagickWriteImages( dest, oip->savefile, MagickTrue ) )
         MessageBox( NULL, (LPCSTR) "出力失敗", (LPCSTR) "アニメーションGIF出力プラグイン", MB_OK|MB_ICONSTOP );
     
     DestroyMagickWand( dest );
