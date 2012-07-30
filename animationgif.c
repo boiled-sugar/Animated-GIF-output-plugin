@@ -3,7 +3,7 @@
 //----------------------------------------------------------------------------------
 #include <windows.h>
 #include <math.h>
-#include <wand/MagickWand.h>    //ImageMagick-6.7.8-1を使用
+#include <wand/MagickWand.h>    //ImageMagick-6.7.8-7を使用
                                 //./configure --disable-shared --without-magick-plus-plus --with-quantum-depth=8 --disable-installed --without-bzlib
 #include "output.h"
 
@@ -80,6 +80,7 @@ BOOL func_output( OUTPUT_INFO *oip )
             MessageBox( NULL, (LPCSTR) "データ取得失敗", (LPCSTR) "アニメーションGIF出力プラグイン", MB_OK|MB_ICONSTOP );
         MagickFlipImage( source );    //AviUtlからはボトムアップで渡されるが、MagickConstituteImageはトップダウン固定
         MagickSetImageDelay( source, delay * ( copy + 1 ) );    //コピーフレーム数0なら1倍
+        //MagickSetImageDispose( source, 0 );
         MagickAddImage( dest, source );
         DestroyMagickWand( source );
         i = i + copy;    //コピーフレーム数分だけ先送り
@@ -87,8 +88,12 @@ BOOL func_output( OUTPUT_INFO *oip )
     }
     MagickSetFirstIterator( dest );
     MagickQuantizeImages( dest, 256, RGBColorspace, 0, FloydSteinbergDitherMethod, MagickFalse );
+    //MagickSetFirstIterator( dest );
+    //MagickSetImageIterations( dest, 0 );
     if( !MagickSetFormat( dest, "GIF" ) )
         MessageBox( NULL, (LPCSTR) "GIFセット失敗", (LPCSTR) "アニメーションGIF出力プラグイン", MB_OK|MB_ICONSTOP );
+    dest = MagickOptimizeImageLayers( MagickCoalesceImages( dest ) );    //ここでdisposeが1になる
+    MagickOptimizeImageTransparency( dest );    //6.7.8-7以降が必要
     if( !MagickWriteImages( dest, oip->savefile, MagickTrue ) )
         MessageBox( NULL, (LPCSTR) "出力失敗", (LPCSTR) "アニメーションGIF出力プラグイン", MB_OK|MB_ICONSTOP );
     
